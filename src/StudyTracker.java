@@ -1,5 +1,8 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class StudyTracker {
     public static void main(String[] args) {
@@ -35,10 +38,15 @@ public class StudyTracker {
                     }
                 }
 
+                // Creates and saves the study session prior to adding it to the list to avoid accepting sessions that fail to save.
                 StudySession session = new StudySession(courseName, currentDate, minutesStudied);
-                studySessionsList.add(session);
-
-                IO.println("\nYou successfully added a new study session!\n");
+                try{
+                    saveSession(session);
+                    studySessionsList.add(session);
+                    IO.println("\nYou successfully added a new study session!\n");
+                } catch (IOException e){
+                    IO.println("Failed to save this study session.");
+                }
 
             } else if(choice.equals("2")) {
                 IO.println("You picked number 2\n");
@@ -48,6 +56,15 @@ public class StudyTracker {
             } else {
                 IO.println("Please pick 1, 2, or 3\n");
             }
+        }
+    }
+
+    // Created this helper to save each study session to a text file without replacing older recorded sessions.
+    private static void saveSession(StudySession session) throws IOException {
+        try(PrintWriter sessionWriter = new PrintWriter(new FileOutputStream("sessions.txt", true))) {
+            sessionWriter.print(session.getCourse() + ",");
+            sessionWriter.print(session.getDate().toString() + ",");
+            sessionWriter.println(session.getMinutes());
         }
     }
 }
